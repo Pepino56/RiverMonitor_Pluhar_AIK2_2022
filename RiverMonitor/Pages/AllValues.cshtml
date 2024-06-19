@@ -1,0 +1,69 @@
+﻿@page "/Allvalues"
+@model RiverMonitor.Pages.AllValuesModel
+@{
+    ViewData["Title"] = "All Values";
+}
+
+<div class="container my-4">
+    @if (Model.Data == null || Model.Data.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            No data available.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h3>All values</h3>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Station</th>
+                            <th>Value</th>
+                            <th>Warning/Alert</th>
+                            <th>Time Stamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var value in Model.Data)
+                        {
+                            var isLatestValue = Model.LatestValues.ContainsKey(value.Station.Id) && value == Model.LatestValues[value.Station.Id];
+                            var isFloodWarning = isLatestValue && value.Val >= value.Station.FloodWarningValue;
+                            var isDroughtWarning = isLatestValue && value.Val <= value.Station.DroughtWarniValue;
+
+                            <tr class="@((isFloodWarning || isDroughtWarning) ? "table-warning" : "")">
+                                <td>
+                                    <a href="/station/@value.Station.Id" class="btn btn-sm btn-outline-info">
+                                        @value.Station.Title
+                                    </a>
+                                </td>
+                                <td>@value.Val</td>
+                                <td>
+                                    @if (isFloodWarning)
+                                    {
+                                        <span class="text-danger">
+                                            <i class="bi bi-cloud-rain-heavy"></i>
+                                            <strong>Flood Warning!</strong>
+                                        </span>
+                                    }
+                                    else if (isDroughtWarning)
+                                    {
+                                        <span class="text-danger">
+                                            <i class="bi bi-fire"></i>
+                                            <strong>Drought Warning!</strong>
+                                        </span>
+                                    }
+                                </td>
+                                <td>@value.TimeStamp</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

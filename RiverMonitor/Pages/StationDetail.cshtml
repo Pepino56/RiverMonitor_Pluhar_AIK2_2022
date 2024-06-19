@@ -1,0 +1,163 @@
+﻿@page "/station/{Id:int}"
+@model RiverMonitor.Pages.StationDetailModel
+@{
+    var station = Model.Data;
+    var pageTitle = station?.Title ?? "Station Detail";
+    ViewData["Title"] = pageTitle;
+}
+
+<div class="container my-4">
+    @if (station == null)
+    {
+        <div class="alert alert-danger text-center">Station not found.</div>
+        return;
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3>@pageTitle</h3>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Left column -->
+                    <h5>Station Details</h5>
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Title</th>
+                            <td>@station.Title</td>
+                        </tr>
+                        <tr>
+                            <th>Flood Warning Level</th>
+                            <td>@station.FloodWarningValue</td>
+                        </tr>
+                        <tr>
+                            <th>Drought Warning Level</td>
+                            <td>@station.DroughtWarniValue</td>
+                        </tr>
+                    </table>
+                    <p>
+                        <a href="/stations" class="btn btn-outline-primary me-2">Back</a>
+                        <a href="/edit/station/@Model.Data.Id" class="btn btn-warning">Edit station</a>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Column with chart -->
+                    <canvas id="stationGraph" width="300" height="150"></canvas>
+                </div>
+            </div>
+
+            <!-- Table with measured values -->
+            <h5 class="mt-4">Measured Values</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Value</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var value in station.Values)
+                    {
+                        var isLatest = value == Model.LatestValue;
+                        var isFloodWarning = isLatest && value.Val >= station.FloodWarningValue;
+                        var isDroughtWarning = isLatest && value.Val <= station.DroughtWarniValue;
+
+                        <tr class="@((isFloodWarning || isDroughtWarning) ? "table-warning" : "")">
+                            <td>@value.Val</td>
+                            <td>
+                                @if (isFloodWarning)
+                                {
+                                    <span class="text-danger">
+                                        <i class="bi bi-cloud-rain-heavy"></i>
+                                        <strong>Flood Warning!</strong>
+                                    </span>
+                                }
+                                else if (isDroughtWarning)
+                                {
+                                    <span class="text-danger">
+                                        <i class="bi bi-fire"></i>
+                                        <strong>Drought Warning!</strong>
+                                    </span>
+                                }
+                            </td>
+                            <td>@value.TimeStamp</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts for chart display -->
+<script>
+    var ctx = document.getElementById('stationGraph').getContext('2d');
+    var jsonData = @Html.Raw(Model.GetValuesAsJson());
+
+    jsonData = jsonData.reverse();
+
+    var labels = jsonData.map(item => new Date(item.TimeStamp));
+    var values = jsonData.map(item => item.Val);
+
+    var floodWarningLevel = @station.FloodWarningValue;
+    var droughtWarningLevel = @station.DroughtWarniValue;
+
+    var backgroundColors = values.map(val => {
+        if (val > floodWarningLevel) {
+            return 'rgba(255, 99, 132, 0.8)';
+        } else if (val < droughtWarningLevel) {
+            return 'rgba(255, 206, 86, 0.8)';
+        } else {
+            return 'rgba(75, 192, 192, 0.8)';
+        }
+    });
+
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+             datasets: [{
+                 label: 'Water Level',
+                 data: values,
+                 backgroundColor: backgroundColors,
+                 borderWidth: 1,
+             }],
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false, //  Hides the colored rectangle and label (legend)
+                },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        display: false,
+                    },
+                    title: { // Label of the x-axis
+                        display: true,
+                        text: '<--Oldest        Newest-->',
+                    },
+                    grid: {
+                        display: false,
+                    },
+                },
+                y: {
+                    ticks: {
+                        beginAtZero: true,
+                    },
+                    title: { // Label of the y-axis
+                        display: true,
+                        text: 'Water Level',
+                    },
+                    grid: {
+                        display: true,
+                    },
+                },
+            },
+        },
+    });
+</script>

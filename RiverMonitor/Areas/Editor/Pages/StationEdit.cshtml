@@ -1,0 +1,85 @@
+﻿@page "/edit/station/{IdStation:int}"
+@model RiverMonitor.Areas.Editor.Pages.StationEditModel
+@{
+    var isNewStation = Model.IdStation == 0;
+    var pageTitle = isNewStation ? "New Station" : "Edit Station";
+}
+
+<div class="container my-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3>@pageTitle</h3>
+
+        </div>
+
+        <div class="card-body">
+            @if (Model.Data == null)
+            {
+                <div class="alert alert-danger text-center">
+                    Station not found.
+                </div>
+            }
+            else
+            {
+                <form method="post" id="stationEditForm" onsubmit="return validateFloodDrought()">
+                    <!-- Hidden input for station ID -->
+                    <input type="hidden" asp-for="Data.Id" />
+
+                    <!-- Form fields with floating labels -->
+                    <div class="form-floating mb-3">
+                        <input asp-for="Data.Title" type="text" class="form-control" required />
+                        <label asp-for="Data.Title">Station Title</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Data.FloodWarningValue" type="number" min="0" max="100" class="form-control" required />
+                        <label asp-for="Data.FloodWarningValue">Flood Warning Level</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Data.DroughtWarniValue" type="number" min="0" max="100" class="form-control" required />
+                        <label asp-for="Data.DroughtWarniValue">Drought Warning Level</label>
+                    </div>
+
+                    <span id="error-message" style="color: red; display: none;"></span> <!-- Error message -->
+                    <!-- Action buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="@(Model.IdStation == 0 ? "/stations" : $"/station/{Model.Data.Id}")" class="btn btn-outline-primary">Cancel</a>
+                        <div>
+                            @if (!isNewStation)
+                            {
+                                <button type="button" class="btn btn-danger me-2" onclick="confirmDelete()">Delete station</button>
+                            }
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </div>
+                    </div>
+                </form>
+
+                @if (!ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mt-3">
+                        @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                @if (!isNewStation)
+                {
+                    <form method="post" asp-page-handler="Delete" id="formDelete" class="d-none">
+                        <input type="hidden" value="@Model.Data?.Id" name="idSt" />
+                    </form>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        if (confirm("Are you sure you want to delete this station?")) {
+            document.getElementById('formDelete').submit();
+        }
+    }
+</script>

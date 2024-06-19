@@ -1,0 +1,70 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <a href="/stations" class="card-link">
+                <div class="card mb-4 h-100 station-card shadow">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-info text-white">
+                        <h5 class="card-title">Stations</h5>
+                        <div class="additional-info">
+                            <p>Explore the list of monitoring stations.</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a href="/Allvalues" class="card-link">
+                <div class="card mb-4 h-100 values-card shadow">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center bg-info text-white">
+                        <h5 class="card-title">All Values</h5>
+                        <div class="additional-info">
+                            <p>View all recorded values.</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .card-link {
+            text-decoration: none; /* Odstranění podtržení odkazu */
+            color: inherit; /* Zachování barvy textu odkazu */
+        }
+
+
+        .station-card, .values-card {
+            transition: transform 0.3s; /* Plynulý efekt při najetí myší */
+            cursor: pointer; /* Změna kurzoru na ruku při najetí myší */
+        }
+
+            .station-card:hover, .values-card:hover {
+                transform: scale(1.05); /* Zvětšení karty při najetí myší */
+            }
+
+        .card-body {
+            height: 100%; /* Zaplnění celé výšky karty */
+        }
+
+        .additional-info {
+            display: none; /* Skrytí podrobností, které se zobrazí při najetí myší */
+        }
+
+        .station-card:hover .additional-info, .values-card:hover .additional-info {
+            display: block; /* Zobrazení podrobností při najetí myší */
+        }
+    </style>
+}
+
