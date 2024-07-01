@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RiverMonitor.Data;
 using System.Net.Mail;
 
-namespace RiverMonitor.Data.Controllers
+namespace RiverMonitor.Controllers
 {
 
     [Route("api/[controller]")]
@@ -62,7 +63,7 @@ namespace RiverMonitor.Data.Controllers
                 );
             }
 
-         
+
             return CreatedAtAction(nameof(GetValue), new { id = newValue.Id.ToString() }, newValue);
         }
 
